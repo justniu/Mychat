@@ -1,5 +1,6 @@
 package client;
 
+import javax.swing.*;
 import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
@@ -8,11 +9,18 @@ import java.nio.channels.DatagramChannel;
 public class DetectServer implements Runnable{
     private static String serverIP;
     private volatile static boolean flag = false;
+    private LoginFrame loginFrame;
+
+    public DetectServer(){}
+
+    public DetectServer(LoginFrame loginFrame){
+        this.loginFrame = loginFrame;
+    }
 
      public void run(){
         new ReceiveThread().start();
         broadPack();
-        System.out.println(getServerIP());
+        JOptionPane.showMessageDialog(loginFrame, "connected to "+getServerIP(), "connected", JOptionPane.INFORMATION_MESSAGE);
     }
 
 

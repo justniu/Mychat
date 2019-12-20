@@ -5,7 +5,7 @@ import java.io.*;
 import java.awt.event.*;
 import java.net.*;
 
-public class ChatClient extends Frame {
+public class ClientChatFrame extends Frame {
     TextField tfTxt = new TextField();
 
     TextArea taContent = new TextArea();
@@ -17,7 +17,7 @@ public class ChatClient extends Frame {
 
 
     public static void main(String[] args) {
-        new ChatClient().launchFrame();
+        new ClientChatFrame().launchFrame();
     }
 
     public void launchFrame() {
