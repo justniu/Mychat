@@ -46,15 +46,15 @@ public class ChatServer {
 
     private class Client implements Runnable {
         private Socket s;
-	private DataInputStream dis = null;
+	private ObjectInputStream ois = null;
         private boolean bConnected = false;	
-	private DataOutputStream dos = null;
+	private ObjectOutputStream oos = null;
 	
 	public Client(Socket s) {
 	    this.s = s;
 	    try{
-	    	dis = new DataInputStream(s.getInputStream());
-		dos = new DataOutputStream(s.getOutputStream());
+	    	ois = new ObjectInputStream(s.getInputStream());
+			oos = new ObjectOutputStream(s.getOutputStream());
 	        bConnected = true;
 	    }catch(IOException e) {
 	    	e.printStackTrace();
@@ -63,7 +63,7 @@ public class ChatServer {
 	
 	public void send(String str) {
 	    try{
-	        dos.writeUTF(str);
+	        oos.writeUTF(str);
 	    }catch(IOException e){
 		clients.remove(this);
 		System.out.println("a client quit");
@@ -73,7 +73,7 @@ public class ChatServer {
 	public void run() {
 	       try{
          	   while(bConnected) {
-	               String str = dis.readUTF();//EOFException
+	               String str = ois.readUTF();//EOFException
 	               System.out.println(str);
 		       for(int i = 0; i<clients.size(); i++) {
 		           Client c = clients.get(i);
@@ -86,8 +86,8 @@ public class ChatServer {
 		   e.printStackTrace();
 	       }finally {
 	       	   try{
-		       if(dis != null) dis.close();
-		       if(dos != null) dos.close();
+		       if(ois != null) ois.close();
+		       if(oos != null) oos.close();
 		       if(s != null) s.close();
 		   }catch (IOException e) {
 		       e.printStackTrace();
