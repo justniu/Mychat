@@ -14,8 +14,8 @@ public class LoginFrame extends JFrame {
     private MyPanel contentPanel;
     private JTextField userTxt;
     private JPasswordField passwordTxt;
-    //private JLabel usernameLb, passwdLb;
-    private JButton loginBtn, cancelBtn, signUpBtn;
+    private JButton loginBtn, cancelBtn;
+    private JLabel signupLb;
 
     LoginFrame() {
         this.setTitle("Login");
@@ -82,7 +82,7 @@ public class LoginFrame extends JFrame {
         loginBtn = new JButton("Login");
         loginBtn.setBounds(95, 210, 80, 23);
         loginBtn.setBackground(Color.RED);
-        loginBtn.addActionListener(new AbstractAction() {
+        loginBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 login();
@@ -103,12 +103,22 @@ public class LoginFrame extends JFrame {
             }
         });
 
-        signUpBtn = new JButton("<html><u>signup</u></html>");
-        signUpBtn.setBounds(220, 250, 100, 20);
-        signUpBtn.setOpaque(true);
-        signUpBtn.setBorder(new EmptyBorder(0, 0, 0, 0));
-        signUpBtn.setBackground(Color.WHITE);
-        contentPanel.add(signUpBtn);
+        signupLb = new JLabel("<html><u>signup</u></html>");
+        signupLb.setBounds(253, 251, 100, 20);
+        signupLb.setOpaque(true);
+        signupLb.setBorder(new EmptyBorder(0, 0, 0, 0));
+        signupLb.setForeground(Color.BLUE);
+        signupLb.setBackground(Color.WHITE);
+        signupLb.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+        signupLb.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                dispose();
+                new RegisterFrame();
+            }
+        });
+        contentPanel.add(signupLb);
 
         contentPanel.add(cancelBtn);
         this.setLocationRelativeTo(null);
