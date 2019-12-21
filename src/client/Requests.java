@@ -18,6 +18,7 @@ public class Requests{
             ConManager.clientSocket = new Socket(ip, 7788);
             ConManager.oos = new ObjectOutputStream(ConManager.clientSocket.getOutputStream());
             ConManager.ois = new ObjectInputStream(ConManager.clientSocket.getInputStream());
+            JOptionPane.showMessageDialog(null, "connected to "+ip, "connected", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(new JFrame(),
                     "连接服务器失败,请检查!","服务器未连上", JOptionPane.ERROR_MESSAGE);//否则连接失败

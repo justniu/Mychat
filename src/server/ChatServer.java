@@ -16,7 +16,7 @@ public class ChatServer {
 
     public void start() {
         try{
-	    ss = new ServerSocket(8888);
+	    ss = new ServerSocket(7788);
 	    started = true;
 	}catch (BindException e) {
 	    System.out.println("port is used!");

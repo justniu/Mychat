@@ -1,10 +1,11 @@
 package common;
 
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Response {
+public class Response implements Serializable {
     private static final long serialVersionUID = 1689541820872288991L;
     /** 响应状态 */
     private ResponseStatus status;

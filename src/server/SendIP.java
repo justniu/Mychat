@@ -6,19 +6,18 @@ import java.net.*;
 public class SendIP implements Runnable{
     private String clientIP;
 
-    public SendIP(){
-        while(true){
-            RecPack();
-            sendIP(clientIP);
-        }
-    }
+//    public SendIP(){
+//        while(true){
+//            RecPack();
+//            sendIP(clientIP);
+//        }
+//    }
 
     public void run(){
         while(true){
             RecPack();
             sendIP(clientIP);
         }
-
     }
 
     public void sendIP(String clientIP){
@@ -44,7 +43,7 @@ public class SendIP implements Runnable{
         try {
             DatagramSocket ds = new DatagramSocket(12345);
             ds.receive(dp);
-            System.out.println(dp.getAddress());
+            System.out.println(dp.getAddress().toString().substring(1) + " 尝试连接！");
             this.clientIP = dp.getAddress().toString().substring(1);
             ds.close();
         } catch (SocketException e) {

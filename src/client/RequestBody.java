@@ -2,10 +2,11 @@ package client;
 
 import common.ResponseType;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestBody {
+public class RequestBody implements Serializable {
     private static final long serialVersionUID = -1237018286305074249L;
     /** 请求传送的数据类型 */
     private ResponseType type;

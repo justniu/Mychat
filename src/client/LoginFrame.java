@@ -148,10 +148,10 @@ public class LoginFrame extends JFrame {
      */
     @SuppressWarnings("unchecked")
     private void login() {
-        if (userTxt.getText().length() == 0
-                || passwordTxt.getPassword().length == 0) {
+        if (userTxt.getText().equals("username")
+                || passwordTxt.getPassword().toString().equals("password")) {
             JOptionPane.showMessageDialog(LoginFrame.this,
-                    "账号和password是必填的",
+                    "Username and Password are required",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
             userTxt.requestFocusInWindow();
             return;
@@ -159,7 +159,7 @@ public class LoginFrame extends JFrame {
 
         if (!userTxt.getText().matches("^\\w*$")) {
             JOptionPane.showMessageDialog(LoginFrame.this,
-                    "账号必须是数字",
+                    "Only identifiers are optional",
                     "Input Error", JOptionPane.ERROR_MESSAGE);
             userTxt.requestFocusInWindow();
             return;
@@ -194,6 +194,9 @@ public class LoginFrame extends JFrame {
                     JOptionPane.showMessageDialog(LoginFrame.this,
                             "Username or password is incorrect",
                             "Login Failed", JOptionPane.ERROR_MESSAGE);
+                    break;
+                case HAS_LOGGED_IN:
+                    JOptionPane.showMessageDialog(LoginFrame.this, "This user has logged in", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
         } else {

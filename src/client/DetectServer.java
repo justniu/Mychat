@@ -9,7 +9,7 @@ import java.nio.channels.DatagramChannel;
 public class DetectServer implements Runnable{
     private static String serverIP;
     private volatile static boolean flag = false;
-    private LoginFrame loginFrame;
+    private LoginFrame loginFrame=null;
 
     public DetectServer(){}
 
@@ -19,8 +19,12 @@ public class DetectServer implements Runnable{
 
      public void run(){
         new ReceiveThread().start();
-        broadPack();
-        JOptionPane.showMessageDialog(loginFrame, "connected to "+getServerIP(), "connected", JOptionPane.INFORMATION_MESSAGE);
+         try {
+             Thread.sleep(100);
+         } catch (InterruptedException e) {
+             e.printStackTrace();
+         }
+         broadPack();
     }
 
 
@@ -41,16 +45,19 @@ public class DetectServer implements Runnable{
 
     private class ReceiveThread extends Thread{
         public void run(){
-            byte[] buf = new byte[1024];
-            DatagramPacket dp = new DatagramPacket(buf, buf.length);
             try {
+                byte[] buf = new byte[1024];
+                DatagramPacket dp = new DatagramPacket(buf, buf.length);
                 DatagramSocket ds = new DatagramSocket(9999);
+                ds.setSoTimeout(3000);
                 ds.receive(dp);
                 serverIP = dp.getAddress().toString().substring(1);
                 flag = true;
                 ds.close();
             } catch (SocketException e) {
-                e.printStackTrace();
+            } catch (SocketTimeoutException e){
+                JOptionPane.showMessageDialog(loginFrame, "Connection timed out Please try again", "Timeout", JOptionPane.WARNING_MESSAGE);
+                System.exit(0);
             } catch (IOException e) {
                 e.printStackTrace();
             }

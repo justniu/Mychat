@@ -1,9 +1,14 @@
 package client;
 
+import common.Response;
+import common.ResponseStatus;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 
 
 public class RegisterFrame extends JFrame {
@@ -28,12 +33,12 @@ public class RegisterFrame extends JFrame {
         contentPanel.setFocusable(true);//设置初始光标
 
 
-        //账号标签
-        usernameLb = new JLabel("user");
-        usernameLb.setBounds(40, 46, 54, 28);
+        //username label
+        usernameLb = new JLabel("username");
+        usernameLb.setBounds(20, 46, 74, 28);
         contentPanel.add(usernameLb);
 
-        //密码标签
+        //password label
         passwdLb = new JLabel("password");
         passwdLb.setBounds(20, 86, 70, 28);
         contentPanel.add(passwdLb);
@@ -44,21 +49,25 @@ public class RegisterFrame extends JFrame {
 
         userTxt = new JTextField();
         userTxt.setBounds(99, 50, 161, 25);
+        userTxt.setOpaque(false);
+        userTxt.setFont(new Font("Times New Roman", Font.PLAIN, 12));
         contentPanel.add(userTxt);
 
         passwordTxt = new JPasswordField();
         passwordTxt.setBounds(99, 90, 161, 25);
+        passwordTxt.setOpaque(false);
         contentPanel.add(passwordTxt);
 
         confirmTxt = new JPasswordField();
         confirmTxt.setBounds(99, 140, 161, 25);
+        confirmTxt.setOpaque(false);
         contentPanel.add(confirmTxt);
 
-        //注册按钮
-        yesBtn = new JButton("注册");
+        // OK button
+        yesBtn = new JButton("OK");
         yesBtn.setBounds(95, 210, 80, 23);
         yesBtn.setBackground(Color.RED);
-        yesBtn.addActionListener(new AbstractAction() {
+        yesBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
 
@@ -81,12 +90,37 @@ public class RegisterFrame extends JFrame {
         public void paintComponent(Graphics g){
             super.paintComponent(g);
             //相对路径从src开始
-            Image image = new ImageIcon("src/images.jpeg").getImage();
+            Image image = new ImageIcon("src/register.jpg").getImage();
 
             // 跟随窗口调整背景图片大小
             g.drawImage(image,0, 0, this.getWidth(), this.getHeight(),this);
         }
     }
+
+
+    private void registe(User user) throws ClassNotFoundException, IOException {
+        RequestBody request = new RequestBody();
+        request.setAction("userRegiste");
+        request.setAttribute("user", user);
+
+        //获取响应
+        Response response = Requests.sendTextRequest(request);
+
+        ResponseStatus status = response.getStatus();
+        switch(status){
+            case OK:
+                User user2 = (User)response.getData("user");
+                JOptionPane.showMessageDialog(RegisterFrame.this,
+                        "恭喜您，您的账号注册成功,请牢记!!!",
+                        "注册成功",JOptionPane.INFORMATION_MESSAGE);
+                this.setVisible(false);
+                break;
+            default:
+                JOptionPane.showMessageDialog(RegisterFrame.this,
+                        "注册失败，请稍后再试！！！","服务器内部错误！",JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 }
 
 

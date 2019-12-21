@@ -43,7 +43,7 @@ public class UserServices {
                     int ok = preSql.executeUpdate();
                     return DBExecuteStatus.OK;
                 }else {
-                    return DBExecuteStatus.LOGINED_ERROR;
+                    return DBExecuteStatus.HAS_LOGGED_IN_ERROR;
                 }
             }else{
                 return DBExecuteStatus.NO_EXIST_ERROR;
@@ -127,7 +127,7 @@ public class UserServices {
 //        }
 //    }
     public static void main(String[] args) {
-        DBExecuteStatus b = new UserServices().login("2", "2");
+        DBExecuteStatus b = new UserServices().login("1", "2");
         System.out.println(b.name());
     }
 }

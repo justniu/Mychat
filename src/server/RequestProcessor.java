@@ -33,7 +33,7 @@ public class RequestProcessor implements Runnable{
                 String action = request.getAction();   //获取请求中的动作
                 switch (action){
                     case "userRegiste": break;
-                    case "userLogin": break;
+                    case "userLogin": loginProcess(currentClientIOCache, request);break;
                     case "exit": break;
                     case "chat": break;
                     case "shake": break;
@@ -43,7 +43,7 @@ public class RequestProcessor implements Runnable{
                 }
             }
         }catch(Exception e){
-            e.printStackTrace();
+            System.out.println("客户离开: "+currentClientSocket.getInetAddress().toString().substring(1));
         }
     }
 //
@@ -133,8 +133,9 @@ public class RequestProcessor implements Runnable{
 
         Response response = new Response();  //创建一个响应对象
         switch (b){
-            case LOGINED_ERROR:
+            case HAS_LOGGED_IN_ERROR:
                 response.setStatus(ResponseStatus.OK);
+                response.setData("status", UserStatus.HAS_LOGGED_IN);
                 response.setData("msg", "该 用户已经在别处上线了！");
                 try {
                     currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写

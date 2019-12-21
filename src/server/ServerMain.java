@@ -7,13 +7,13 @@ import java.net.Socket;
 
 public class ServerMain {
     public static void main(String[] args) {
-        int port = Integer.parseInt(DataBuffer.configProp.getProperty("port"));
         //初始化服务器套节字
         try {
-            DataBuffer.serverSocket = new ServerSocket(port);
+            DataBuffer.serverSocket = new ServerSocket(7788);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        new Thread(new SendIP()).start();
 
         new Thread(new Runnable() {//启动新线程进行客户端连接监听
             public void run() {
