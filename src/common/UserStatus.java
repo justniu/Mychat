@@ -4,9 +4,12 @@ import java.io.Serializable;
 
 public enum UserStatus implements Serializable {
     OUTLINE,
-    LOGINED,
+    LOGGED,
     HAS_LOGGED_IN,
     LOGIN_SUCCESS,
-    NO_EXIST
+    REGISTE_SUCCESS,
+    NO_EXIST,
+    EXIST_ERROR,
+    ERROR
 
 }

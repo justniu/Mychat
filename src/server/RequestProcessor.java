@@ -32,7 +32,7 @@ public class RequestProcessor implements Runnable{
                 System.out.println("Server读取了客户端的请求:" + request.getAction());
                 String action = request.getAction();   //获取请求中的动作
                 switch (action){
-                    case "userRegiste": break;
+                    case "userRegiste": registeProcess(currentClientIOCache, request);break;
                     case "userLogin": loginProcess(currentClientIOCache, request);break;
                     case "exit": break;
                     case "chat": break;
@@ -43,7 +43,8 @@ public class RequestProcessor implements Runnable{
                 }
             }
         }catch(Exception e){
-            System.out.println("客户离开: "+currentClientSocket.getInetAddress().toString().substring(1));
+            e.printStackTrace();
+            System.out.println("客户出错: "+currentClientSocket.getInetAddress().toString().substring(1));
         }
     }
 //
@@ -102,28 +103,40 @@ public class RequestProcessor implements Runnable{
 //
 //        return false;  //断开监听
 //    }
-//    /** 注册 */
-//    public void registe(OnlineClientIOCache oio, Request request) throws IOException {
-//        User user = (User)request.getAttribute("user");
-//        UserService userService = new UserService();
-//        userService.addUser(user);
-//
-//        Response response = new Response();  //创建一个响应对象
-//        response.setStatus(ResponseStatus.OK);
-//        response.setData("user", user);
-//
-//        oio.getOos().writeObject(response);  //把响应对象往客户端写
-//        oio.getOos().flush();
-//
-//        //把新注册用户添加到RegistedUserTableModel中
-//        DataBuffer.registedUserTableModel.add(new String[]{
-//                String.valueOf(user.getId()),
-//                user.getPassword(),
-//                user.getNickname(),
-//                String.valueOf(user.getSex())
-//        });
-//    }
-//
+    /** 注册 */
+    public void registeProcess(SingleClientIO currentClientIO, RequestBody request) throws IOException {
+        User user = (User)request.getAttribute("user");
+        DBExecuteStatus b = UserServices.addUser(user);
+        Response response = new Response();  //创建一个响应对象
+
+        switch (b){
+            case OK:
+                response.setStatus(ResponseStatus.OK);
+                response.setData("status", UserStatus.REGISTE_SUCCESS);
+                currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
+                currentClientIO.getOos().flush();
+                //把新注册用户添加到RegistedUserTableModel中
+                DataBuffer.registedUserTableModel.add(new String[]{
+                        user.getPassword(),
+                        user.getUsername(),
+                });
+
+                break;
+            case EXISTED_ERROR:
+                response.setStatus(ResponseStatus.OK);
+                response.setData("status", UserStatus.EXIST_ERROR);
+                currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
+                currentClientIO.getOos().flush();
+                break;
+        }
+
+
+
+
+
+
+    }
+
     /** process login request */
     public void loginProcess(SingleClientIO currentClientIO, RequestBody request) throws IOException {
         String username = (String)request.getAttribute("username");
@@ -137,12 +150,8 @@ public class RequestProcessor implements Runnable{
                 response.setStatus(ResponseStatus.OK);
                 response.setData("status", UserStatus.HAS_LOGGED_IN);
                 response.setData("msg", "该 用户已经在别处上线了！");
-                try {
-                    currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
-                    currentClientIO.getOos().flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
+                currentClientIO.getOos().flush();
                 break;
 
             case OK:

@@ -1,5 +1,6 @@
 package server;
 
+import common.User;
 import common.UserStatus;
 
 import java.io.FileInputStream;
@@ -8,17 +9,47 @@ import java.sql.*;
 import java.util.List;
 
 public class UserServices {
-    private static int idCount = 3; //id
 
-//    /** 新增用户 */
-//    public void addUser(User user){
-//        List<User> users = loadAllUser();
-//        users.add(user);
-//        saveAllUser(users);
-//    }
+    /** 新增用户 */
+    public static DBExecuteStatus addUser(User user){
+        PreparedStatement preSql;
+        Connection con;
+        String sqlStr;
+        ResultSet rs;
+        con = DBManager.connection("MyChat", "root", "niuzhuang");
+        if(con == null) return DBExecuteStatus.CONNECTION_ERROR;
+        try {
+            con.setAutoCommit(false);
+            sqlStr = "SELECT * FROM user WHERE name=?";
+            preSql = con.prepareStatement(sqlStr);
+            preSql.setString(1, user.getUsername());
+            rs = preSql.executeQuery();
+            if(!rs.next()){
+                sqlStr = "INSERT INTO user VALUES(?, ?, ?)";
+                preSql = con.prepareStatement(sqlStr);
+                preSql.setString(1, user.getUsername());
+                preSql.setString(2, user.getPassword());
+                preSql.setString(3, "OUTLINE");
+                int ok = preSql.executeUpdate();
+                return DBExecuteStatus.OK;
+            }else{
+                return DBExecuteStatus.EXISTED_ERROR;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                con.commit();
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return DBExecuteStatus.ERROR;
+    }
 
     /** user login */
-    public DBExecuteStatus login(String name, String password){
+    public static DBExecuteStatus login(String name, String password){
         PreparedStatement preSql;
         Connection con;
         String sqlStr;
@@ -37,7 +68,7 @@ public class UserServices {
                 if(UserStatus.valueOf(status) == UserStatus.OUTLINE){
                     sqlStr = "update user set status=? where name=? and password=?";
                     preSql = con.prepareStatement(sqlStr);
-                    preSql.setString(1, "LOGINED");
+                    preSql.setString(1, "LOGGED");
                     preSql.setString(2, name);
                     preSql.setString(3, password);
                     int ok = preSql.executeUpdate();
@@ -77,7 +108,7 @@ public class UserServices {
 //
     /** 加载所有用户 */
     @SuppressWarnings("unchecked")
-    public List<User> loadAllUser() {
+    public static List<User> loadAllUser() {
         List<User> list = null;
         return list;
     }
@@ -119,15 +150,12 @@ public class UserServices {
 //        this.saveAllUser(users);
 //    }
 //
-//    public static void main(String[] args){
-//        new UserService().initUser();
-//        List<User> users = new UserService().loadAllUser();
-//        for (User user : users) {
-//            System.out.println(user);
-//        }
-//    }
+
     public static void main(String[] args) {
-        DBExecuteStatus b = new UserServices().login("1", "2");
+        DBExecuteStatus b = UserServices.login("1", "2");
         System.out.println(b.name());
+        User user = new User("33", "22");
+        b = UserServices.addUser(user);
+        System.out.println(b);
     }
 }

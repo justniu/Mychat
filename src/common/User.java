@@ -1,11 +1,13 @@
-package client;
+package common;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     private static final long serialVersionUID = 5942011574971970871L;
     private String password;
     private String username;
 
-    public User(String password, String username){
+    public User(String username, String password){
         this.password = password;
         this.username = username;
     }
@@ -19,11 +21,11 @@ public class User {
     }
 
 
-    public void setusername(String username){
+    public void setUsername(String username){
         this.username = username;
     }
 
-    public String getusername(){
+    public String getUsername(){
         return this.username;
     }
 

@@ -2,6 +2,8 @@ package client;
 
 import common.Response;
 import common.ResponseStatus;
+import common.User;
+import common.UserStatus;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -50,7 +52,7 @@ public class RegisterFrame extends JFrame {
         userTxt = new JTextField();
         userTxt.setBounds(99, 50, 161, 25);
         userTxt.setOpaque(false);
-        userTxt.setFont(new Font("Times New Roman", Font.PLAIN, 12));
+        userTxt.setFont(new Font("Times New Roman", Font.BOLD, 12));
         contentPanel.add(userTxt);
 
         passwordTxt = new JPasswordField();
@@ -70,7 +72,28 @@ public class RegisterFrame extends JFrame {
         yesBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-
+                if(userTxt.getText().length() < 3){
+                    JOptionPane.showMessageDialog(RegisterFrame.this,
+                            "Username is not proper",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                }else if(new String(passwordTxt.getPassword()).length() < 5){
+                    JOptionPane.showMessageDialog(RegisterFrame.this,
+                            "Password is not safe",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                }else if(!(new String(passwordTxt.getPassword()).equals(new String(confirmTxt.getPassword())))){
+                    JOptionPane.showMessageDialog(RegisterFrame.this,
+                            "Two inputs are not equal",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                }else{
+                    User user = new User(userTxt.getText(), new String(passwordTxt.getPassword()));
+                    try {
+                        registe(user);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
         contentPanel.add(yesBtn);
@@ -105,20 +128,26 @@ public class RegisterFrame extends JFrame {
 
         //获取响应
         Response response = Requests.sendTextRequest(request);
-
-        ResponseStatus status = response.getStatus();
-        switch(status){
-            case OK:
-                User user2 = (User)response.getData("user");
-                JOptionPane.showMessageDialog(RegisterFrame.this,
-                        "恭喜您，您的账号注册成功,请牢记!!!",
-                        "注册成功",JOptionPane.INFORMATION_MESSAGE);
-                this.setVisible(false);
-                break;
-            default:
-                JOptionPane.showMessageDialog(RegisterFrame.this,
-                        "注册失败，请稍后再试！！！","服务器内部错误！",JOptionPane.ERROR_MESSAGE);
+        System.out.println(response);
+        if( response.getStatus() == ResponseStatus.OK){
+            UserStatus status = (UserStatus) response.getData("status");
+            System.out.println("status"+status);
+            switch(status){
+                case REGISTE_SUCCESS:
+                    JOptionPane.showMessageDialog(RegisterFrame.this,
+                            "恭喜您，您的账号注册成功,请牢记!!!",
+                            "注册成功",JOptionPane.INFORMATION_MESSAGE);
+                    this.setVisible(false);
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(RegisterFrame.this,
+                            "注册失败，请稍后再试！！！","服务器内部错误！",JOptionPane.ERROR_MESSAGE);
+            }
+        }else{
+            JOptionPane.showMessageDialog(RegisterFrame.this,
+                    "服务器内部错误，请稍后再试！！！", "注册失败", JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
 }
