@@ -2,5 +2,8 @@ package common;
 
 public enum UserStatus {
     OUTLINE,
-    LOGINED
+    LOGINED,
+    LOGIN_SUCCESS,
+    NO_EXIST
+
 }

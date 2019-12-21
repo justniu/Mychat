@@ -1,42 +1,51 @@
 package server;
 
 import client.RequestBody;
+import common.*;
 
+import javax.xml.crypto.dsig.SignedInfo;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class RequestProcessor {
-//    private Socket currentClientSocket;  //当前正在请求服务器的客户端Socket
-//
-//    public RequestProcessor(Socket currentClientSocket){
-//        this.currentClientSocket = currentClientSocket;
-//    }
-//
-//    public void run() {
-//        boolean flag = true; //是否不间断监听
-//        try{
-//            OnlineClientIOCache currentClientIOCache = new OnlineClientIOCache(
-//                    new ObjectInputStream(currentClientSocket.getInputStream()),
-//                    new ObjectOutputStream(currentClientSocket.getOutputStream()));
-//            while(flag){ //不停地读取客户端发过来的请求对象
-//                //从请求输入流中读取到客户端提交的请求对象
-//                RequestBody request = (RequestBody) currentClientIOCache.getOis().readObject();
-//                System.out.println("Server读取了客户端的请求:" + request.getAction());
-//                String action = request.getAction();   //获取请求中的动作
-//                switch (action){
-//                    case "userRegiste": break;
-//                    case "userLogin": break;
-//                    case "exit": break;
-//                    case "chat": break;
-//                    case "shake": break;
-//                    case "sendFile": break;
-//                    case "agreeRecFile": break;
-//                    case "refusRecFile": break;
-//                }
-//            }
-//        }catch(Exception e){
-//            e.printStackTrace();
-//        }
-//    }
+public class RequestProcessor implements Runnable{
+    private Socket currentClientSocket;  //当前正在请求服务器的客户端Socket
+
+    public RequestProcessor(Socket currentClientSocket){
+        this.currentClientSocket = currentClientSocket;
+    }
+
+    public void run() {
+        boolean flag = true; //是否不间断监听
+        try{
+            SingleClientIO currentClientIOCache = new SingleClientIO(
+                    new ObjectInputStream(currentClientSocket.getInputStream()),
+                    new ObjectOutputStream(currentClientSocket.getOutputStream()));
+            while(flag){ //不停地读取客户端发过来的请求对象
+                //从请求输入流中读取到客户端提交的请求对象
+                RequestBody request = (RequestBody) currentClientIOCache.getOis().readObject();
+                System.out.println("Server读取了客户端的请求:" + request.getAction());
+                String action = request.getAction();   //获取请求中的动作
+                switch (action){
+                    case "userRegiste": break;
+                    case "userLogin": break;
+                    case "exit": break;
+                    case "chat": break;
+                    case "shake": break;
+                    case "sendFile": break;
+                    case "agreeRecFile": break;
+                    case "refusRecFile": break;
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 //
 //    /** 拒绝接收文件 */
 //    private void refuseReceiveFile(Request request) throws IOException {
@@ -115,54 +124,59 @@ public class RequestProcessor {
 //        });
 //    }
 //
-//    /** process login request */
-//    public void loginProcess(OnlineClientIOCache currentClientIO, RequestBody request) throws IOException {
-//        String username = (String)request.getAttribute("username");
-//        String password = (String) request.getAttribute("password");
-//        UserService userService = new UserService();
-//        User user = userService.login(username, password);
-//
-//        Response response = new Response();  //创建一个响应对象
-//        if(null != user){
-//            if(DataBuffer.onlineUsersMap.containsKey(user.getId())){ //用户已经登录了
-//                response.setStatus(ResponseStatus.OK);
-//                response.setData("msg", "该 用户已经在别处上线了！");
-//                currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
-//                currentClientIO.getOos().flush();
-//            }else { //正确登录
-//                DataBuffer.onlineUsersMap.put(user.getId(), user); //添加到在线用户
-//
-//                //设置在线用户
-//                response.setData("onlineUsers",
-//                        new CopyOnWriteArrayList<User>(DataBuffer.onlineUsersMap.values()));
-//
-//                response.setStatus(ResponseStatus.OK);
-//                response.setData("user", user);
-//                currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
-//                currentClientIO.getOos().flush();
-//
-//                //通知其它用户有人上线了
-//                Response response2 = new Response();
-//                response2.setType(ResponseType.LOGIN);
-//                response2.setData("loginUser", user);
-//                iteratorResponse(response2);
-//
-//                //把当前上线的用户IO添加到缓存Map中
-//                DataBuffer.onlineUserIOCacheMap.put(user.getId(),currentClientIO);
-//
-//                //把当前上线用户添加到OnlineUserTableModel中
-//                DataBuffer.onlineUserTableModel.add(
-//                        new String[]{String.valueOf(user.getId()),
-//                                user.getNickname(),
-//                                String.valueOf(user.getSex())});
-//            }
-//        }else{ //登录失败
-//            response.setStatus(ResponseStatus.OK);
-//            response.setData("msg", "账号或密码不正确！");
-//            currentClientIO.getOos().writeObject(response);
-//            currentClientIO.getOos().flush();
-//        }
-//    }
+    /** process login request */
+    public void loginProcess(SingleClientIO currentClientIO, RequestBody request) throws IOException {
+        String username = (String)request.getAttribute("username");
+        String password = (String) request.getAttribute("password");
+        UserServices userService = new UserServices();
+        DBExecuteStatus b = userService.login(username, password);
+
+        Response response = new Response();  //创建一个响应对象
+        switch (b){
+            case LOGINED_ERROR:
+                response.setStatus(ResponseStatus.OK);
+                response.setData("msg", "该 用户已经在别处上线了！");
+                try {
+                    currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
+                    currentClientIO.getOos().flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case OK:
+                DataBuffer.onlineUsersList.add(username); //添加到在线用户
+
+                //设置在线用户
+                response.setData("onlineUsers",
+                        new CopyOnWriteArrayList<String>((String[]) DataBuffer.onlineUsersList.toArray()));
+
+                response.setStatus(ResponseStatus.OK);
+                response.setData("status", UserStatus.LOGIN_SUCCESS);
+                currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
+                currentClientIO.getOos().flush();
+
+                //通知其它用户有人上线了
+                Response response2 = new Response();
+                response2.setType(ResponseType.LOGIN);
+                response2.setData("loginUser", username);
+                iteratorResponse(response2);
+
+                //把当前上线的用户IO添加到缓存Map中
+                DataBuffer.onlineUserIOCacheMap.put(username, currentClientIO);
+
+                //把当前上线用户添加到OnlineUserTableModel中
+                DataBuffer.onlineUserTableModel.add(username);
+                break;
+
+            case NO_EXIST_ERROR:
+                response.setStatus(ResponseStatus.OK);
+                response.setData("status", UserStatus.NO_EXIST);
+                currentClientIO.getOos().writeObject(response);
+                currentClientIO.getOos().flush();
+                break;
+        }
+    }
 //
 //    /** 聊天 */
 //    public void chat(Request request) throws IOException {
@@ -183,74 +197,71 @@ public class RequestProcessor {
 //        }
 //    }
 //
-//    /*广播*/
-//    public static void board(String str) throws IOException {
-//        User user = new User(1,"admin");
-//        Message msg = new Message();
-//        msg.setFromUser(user);
-//        msg.setSendTime(new Date());
+    /*广播*/
+    public static void board(String str) throws IOException {
+        Message msg = new Message();
+        msg.setFromUser("admin");
+        msg.setSendTime(new Date());
+
+        DateFormat df = new SimpleDateFormat("HH:mm:ss");
+        StringBuffer sb = new StringBuffer();
+        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
+        sb.append("系统通知\n  "+str+"\n");
+        msg.setMessage(sb.toString());
+
+        Response response = new Response();
+        response.setStatus(ResponseStatus.OK);
+        response.setType(ResponseType.BOARD);
+        response.setData("txtMsg", msg);
+
+        for (String name : DataBuffer.onlineUserIOCacheMap.keySet()) {
+            sendResponse_sys(DataBuffer.onlineUserIOCacheMap.get(name), response);
+        }
+    }
 //
-//        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-//        StringBuffer sb = new StringBuffer();
-//        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
-//        sb.append("系统通知\n  "+str+"\n");
-//        msg.setMessage(sb.toString());
-//
-//        Response response = new Response();
-//        response.setStatus(ResponseStatus.OK);
-//        response.setType(ResponseType.BOARD);
-//        response.setData("txtMsg", msg);
-//
-//        for (Long id : DataBuffer.onlineUserIOCacheMap.keySet()) {
-//            sendResponse_sys(DataBuffer.onlineUserIOCacheMap.get(id), response);
-//        }
-//    }
-//
-//    /*踢除用户*/
-//    public static void remove(User user_) throws IOException{
-//        User user = new User(1,"admin");
-//        Message msg = new Message();
-//        msg.setFromUser(user);
-//        msg.setSendTime(new Date());
-//        msg.setToUser(user_);
-//
-//        StringBuffer sb = new StringBuffer();
-//        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-//        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
-//        sb.append("系统通知您\n  "+"您被强制下线"+"\n");
-//        msg.setMessage(sb.toString());
-//
-//        Response response = new Response();
-//        response.setStatus(ResponseStatus.OK);
-//        response.setType(ResponseType.REMOVE);
-//        response.setData("txtMsg", msg);
-//
-//        OnlineClientIOCache io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser().getId());
-//        sendResponse_sys(io, response);
-//    }
-//
-//    /*私信*/
-//    public static void chat_sys(String str,User user_) throws IOException{
-//        User user = new User(1,"admin");
-//        Message msg = new Message();
-//        msg.setFromUser(user);
-//        msg.setSendTime(new Date());
-//        msg.setToUser(user_);
-//
-//        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-//        StringBuffer sb = new StringBuffer();
-//        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
-//        sb.append("系统通知您\n  "+str+"\n");
-//        msg.setMessage(sb.toString());
-//
-//        Response response = new Response();
-//        response.setStatus(ResponseStatus.OK);
-//        response.setType(ResponseType.CHAT);
-//        response.setData("txtMsg", msg);
-//
-//        OnlineClientIOCache io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser().getId());
-//        sendResponse_sys(io, response);
-//    }
+    /*踢除用户*/
+    public static void remove(String user) throws IOException{
+        Message msg = new Message();
+        msg.setFromUser("admin");
+        msg.setSendTime(new Date());
+        msg.setToUser(user);
+
+        StringBuffer sb = new StringBuffer();
+        DateFormat df = new SimpleDateFormat("HH:mm:ss");
+        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
+        sb.append("系统通知您\n  "+"您被强制下线"+"\n");
+        msg.setMessage(sb.toString());
+
+        Response response = new Response();
+        response.setStatus(ResponseStatus.OK);
+        response.setType(ResponseType.REMOVE);
+        response.setData("txtMsg", msg);
+
+        SingleClientIO io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser());
+        sendResponse_sys(io, response);
+    }
+
+    /*私信*/
+    public static void chat_sys(String str,String user_) throws IOException{
+        Message msg = new Message();
+        msg.setFromUser("admin");
+        msg.setSendTime(new Date());
+        msg.setToUser(user_);
+
+        DateFormat df = new SimpleDateFormat("HH:mm:ss");
+        StringBuffer sb = new StringBuffer();
+        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
+        sb.append("系统通知您\n  "+str+"\n");
+        msg.setMessage(sb.toString());
+
+        Response response = new Response();
+        response.setStatus(ResponseStatus.OK);
+        response.setType(ResponseType.CHAT);
+        response.setData("txtMsg", msg);
+
+        SingleClientIO io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser());
+        sendResponse_sys(io, response);
+    }
 //
 //    /** 发送振动 */
 //    public void shake(Request request)throws IOException {
@@ -284,14 +295,14 @@ public class RequestProcessor {
 //        sendResponse(ioCache, response);
 //    }
 //
-//    /** 给所有在线客户都发送响应 */
-//    private void iteratorResponse(Response response) throws IOException {
-//        for(OnlineClientIOCache onlineUserIO : DataBuffer.onlineUserIOCacheMap.values()){
-//            ObjectOutputStream oos = onlineUserIO.getOos();
-//            oos.writeObject(response);
-//            oos.flush();
-//        }
-//    }
+    /** 给所有在线客户都发送响应 */
+    private void iteratorResponse(Response response) throws IOException {
+        for(SingleClientIO onlineUserIO : DataBuffer.onlineUserIOCacheMap.values()){
+            ObjectOutputStream oos = onlineUserIO.getOos();
+            oos.writeObject(response);
+            oos.flush();
+        }
+    }
 //
 //    /** 向指定客户端IO的输出流中输出指定响应 */
 //    private void sendResponse(OnlineClientIOCache onlineUserIO, Response response)throws IOException {
@@ -300,10 +311,10 @@ public class RequestProcessor {
 //        oos.flush();
 //    }
 //
-//    /** 向指定客户端IO的输出流中输出指定响应 */
-//    private static void sendResponse_sys(OnlineClientIOCache onlineUserIO, Response response)throws IOException {
-//        ObjectOutputStream oos = onlineUserIO.getOos();
-//        oos.writeObject(response);
-//        oos.flush();
-//    }
+    /** 向指定客户端IO的输出流中输出指定响应 */
+    private static void sendResponse_sys(SingleClientIO onlineUserIO, Response response)throws IOException {
+        ObjectOutputStream oos = onlineUserIO.getOos();
+        oos.writeObject(response);
+        oos.flush();
+    }
 }

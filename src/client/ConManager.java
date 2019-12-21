@@ -8,9 +8,9 @@ import java.util.List;
 public class ConManager {
 
     /** 当前客户端的用户信息 */
-    public static User currentUser;
+    public static String currentUser;
     /** 在线用户列表 */
-    public static List<User> onlineUsers;
+    public static List<String> onlineUsers;
     /** 当前客户端连接到服务器的套节字 */
     public static Socket clientSocket;
     /** 当前客户端连接到服务器的输出流 */

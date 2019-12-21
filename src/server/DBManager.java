@@ -19,6 +19,11 @@ public class DBManager {
         return con;
     }
 
+    public static ResultSet executeQuery(Connection con, String sqlStr){
+        ResultSet rs = null;
+        return rs;
+    }
+
     public static void main(String[] args) {
         Connection con = DBManager.connection("MyChat", "root", "niuzhuang");
         try {

@@ -19,11 +19,11 @@ public class User {
     }
 
 
-    public void setusername(String username){
+    public void setUsername(String username){
         this.username = username;
     }
 
-    public String getusername(){
+    public String getUsername(){
         return this.username;
     }
 

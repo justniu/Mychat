@@ -2,6 +2,7 @@ package client;
 
 import common.Response;
 import common.ResponseStatus;
+import common.UserStatus;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -151,7 +152,7 @@ public class LoginFrame extends JFrame {
                 || passwordTxt.getPassword().length == 0) {
             JOptionPane.showMessageDialog(LoginFrame.this,
                     "账号和password是必填的",
-                    "输入有误", JOptionPane.ERROR_MESSAGE);
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
             userTxt.requestFocusInWindow();
             return;
         }
@@ -159,7 +160,7 @@ public class LoginFrame extends JFrame {
         if (!userTxt.getText().matches("^\\w*$")) {
             JOptionPane.showMessageDialog(LoginFrame.this,
                     "账号必须是数字",
-                    "输入有误", JOptionPane.ERROR_MESSAGE);
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
             userTxt.requestFocusInWindow();
             return;
         }
@@ -178,21 +179,23 @@ public class LoginFrame extends JFrame {
         }
 
         if (response.getStatus() == ResponseStatus.OK) {
-            //获取当前用户
-            User user2 = (User) response.getData("user");
-            if (user2 != null) { //登录成功
-                ConManager.currentUser = user2;
-                //获取当前在线用户列表
-                ConManager.onlineUsers = (List<User>) response.getData("onlineUsers");
 
-                LoginFrame.this.dispose();
-                new ClientChatFrame();  //打开聊天窗体
-            } else { //登录失败
-                String str = (String) response.getData("msg");
-                JOptionPane.showMessageDialog(LoginFrame.this,
-                        str,
-                        "login failed", JOptionPane.ERROR_MESSAGE);
+            UserStatus status = (UserStatus) response.getData("status");
+            switch (status){
+                case LOGIN_SUCCESS:
+                    ConManager.currentUser = userTxt.getText();
+                    //获取当前在线用户列表
+                    ConManager.onlineUsers = (List<String>) response.getData("onlineUsers");
+
+                    LoginFrame.this.dispose();
+                    new ClientChatFrame();  //打开聊天窗体
+                    break;
+                case NO_EXIST:
+                    JOptionPane.showMessageDialog(LoginFrame.this,
+                            "Username or password is incorrect",
+                            "Login Failed", JOptionPane.ERROR_MESSAGE);
             }
+
         } else {
             JOptionPane.showMessageDialog(LoginFrame.this,
                     "服务器内部错误，请稍后再试！！！", "登录失败", JOptionPane.ERROR_MESSAGE);

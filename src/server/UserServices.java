@@ -2,6 +2,8 @@ package server;
 
 import common.UserStatus;
 
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.sql.*;
 import java.util.List;
 
@@ -16,14 +18,13 @@ public class UserServices {
 //    }
 
     /** user login */
-    public boolean login(String name, String password){
+    public DBExecuteStatus login(String name, String password){
         PreparedStatement preSql;
-        Statement ss;
         Connection con;
         String sqlStr;
         ResultSet rs;
         con = DBManager.connection("MyChat", "root", "niuzhuang");
-        if(con == null) return false;
+        if(con == null) return DBExecuteStatus.CONNECTION_ERROR;
         try {
             con.setAutoCommit(false);
             sqlStr = "select * from user where name=? and password=?";
@@ -34,16 +35,18 @@ public class UserServices {
             if(rs.next()){
                 String status = rs.getString(3);
                 if(UserStatus.valueOf(status) == UserStatus.OUTLINE){
-                    sqlStr = "update user set status='LOGINED' where name='1' and password='2'";
-//                    preSql = con.prepareStatement(sqlStr);
-//                    preSql.setString(1, "LOGINED");
-//                    preSql.setString(2, name);
-//                    preSql.setString(3, password);
-//                    int ok = preSql.executeUpdate();
-                    ss = con.createStatement();
-                    ss.executeUpdate(sqlStr);
-                    return true;
+                    sqlStr = "update user set status=? where name=? and password=?";
+                    preSql = con.prepareStatement(sqlStr);
+                    preSql.setString(1, "LOGINED");
+                    preSql.setString(2, name);
+                    preSql.setString(3, password);
+                    int ok = preSql.executeUpdate();
+                    return DBExecuteStatus.OK;
+                }else {
+                    return DBExecuteStatus.LOGINED_ERROR;
                 }
+            }else{
+                return DBExecuteStatus.NO_EXIST_ERROR;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -55,7 +58,7 @@ public class UserServices {
                 e.printStackTrace();
             }
         }
-        return false;
+        return DBExecuteStatus.ERROR;
     }
 
     /** 根据ID加载用户 */
@@ -72,24 +75,12 @@ public class UserServices {
 //    }
 //
 //
-//    /** 加载所有用户 */
-//    @SuppressWarnings("unchecked")
-//    public List<User> loadAllUser() {
-//        List<User> list = null;
-//        ObjectInputStream ois = null;
-//        try {
-//            ois = new ObjectInputStream(
-//                    new FileInputStream(
-//                            DataBuffer.configProp.getProperty("dbpath")));
-//
-//            list = (List<User>)ois.readObject();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }finally{
-//            IOUtil.close(ois);
-//        }
-//        return list;
-//    }
+    /** 加载所有用户 */
+    @SuppressWarnings("unchecked")
+    public List<User> loadAllUser() {
+        List<User> list = null;
+        return list;
+    }
 //
 //    private void saveAllUser(List<User> users) {
 //        ObjectOutputStream oos = null;
@@ -136,7 +127,7 @@ public class UserServices {
 //        }
 //    }
     public static void main(String[] args) {
-        boolean b = new UserServices().login("1", "2");
-        System.out.println(b);
+        DBExecuteStatus b = new UserServices().login("2", "2");
+        System.out.println(b.name());
     }
 }
