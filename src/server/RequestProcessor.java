@@ -34,8 +34,8 @@ public class RequestProcessor implements Runnable{
                 switch (action){
                     case "userRegiste": registeProcess(currentClientIOCache, request);break;
                     case "userLogin": loginProcess(currentClientIOCache, request);break;
-                    case "exit": break;
-                    case "chat": break;
+                    case "exit": flag = logoutProcess(currentClientIOCache, request);break;
+                    case "chat": chatProcess(request); break;
                     case "shake": break;
                     case "sendFile": break;
                     case "agreeRecFile": break;
@@ -47,39 +47,7 @@ public class RequestProcessor implements Runnable{
             System.out.println("客户出错: "+currentClientSocket.getInetAddress().toString().substring(1));
         }
     }
-//
-//    /** 拒绝接收文件 */
-//    private void refuseReceiveFile(Request request) throws IOException {
-//        FileInfo sendFile = (FileInfo)request.getAttribute("sendFile");
-//        Response response = new Response();  //创建一个响应对象
-//        response.setType(ResponseType.REFUSERECEIVEFILE);
-//        response.setData("sendFile", sendFile);
-//        response.setStatus(ResponseStatus.OK);
-//        //向请求方的输出流输出响应
-//        OnlineClientIOCache ocic = DataBuffer.onlineUserIOCacheMap.get(sendFile.getFromUser().getId());
-//        this.sendResponse(ocic, response);
-//    }
-//
-//    /** 同意接收文件 */
-//    private void agreeReceiveFile(Request request) throws IOException {
-//        FileInfo sendFile = (FileInfo)request.getAttribute("sendFile");
-//        //向请求方(发送方)的输出流输出响应
-//        Response response = new Response();  //创建一个响应对象
-//        response.setType(ResponseType.AGREERECEIVEFILE);
-//        response.setData("sendFile", sendFile);
-//        response.setStatus(ResponseStatus.OK);
-//        OnlineClientIOCache sendIO = DataBuffer.onlineUserIOCacheMap.get(sendFile.getFromUser().getId());
-//        this.sendResponse(sendIO, response);
-//
-//        //向接收方发出接收文件的响应
-//        Response response2 = new Response();  //创建一个响应对象
-//        response2.setType(ResponseType.RECEIVEFILE);
-//        response2.setData("sendFile", sendFile);
-//        response2.setStatus(ResponseStatus.OK);
-//        OnlineClientIOCache receiveIO = DataBuffer.onlineUserIOCacheMap.get(sendFile.getToUser().getId());
-//        this.sendResponse(receiveIO, response2);
-//    }
-//
+
     /** 客户端退出 */
     public boolean logoutProcess(SingleClientIO oio, RequestBody request) throws IOException{
         System.out.println(currentClientSocket.getInetAddress().getHostAddress()
@@ -90,6 +58,7 @@ public class RequestProcessor implements Runnable{
         DataBuffer.onlineUserIOCacheMap.remove(user);
         //从在线用户缓存Map中删除当前用户
         DataBuffer.onlineUsersList.remove(user);
+        DBManager.logout(user);
 
         Response response = new Response();  //创建一个响应对象
         response.setType(ResponseType.LOGOUT);
@@ -130,11 +99,6 @@ public class RequestProcessor implements Runnable{
                 break;
         }
 
-
-
-
-
-
     }
 
     /** process login request */
@@ -155,7 +119,6 @@ public class RequestProcessor implements Runnable{
                 break;
 
             case OK:
-                System.out.println(username);
                 DataBuffer.onlineUsersList.add(username); //添加到在线用户
 
                 //设置在线用户
@@ -188,26 +151,26 @@ public class RequestProcessor implements Runnable{
                 break;
         }
     }
-//
-//    /** 聊天 */
-//    public void chat(Request request) throws IOException {
-//        Message msg = (Message)request.getAttribute("msg");
-//        Response response = new Response();
-//        response.setStatus(ResponseStatus.OK);
-//        response.setType(ResponseType.CHAT);
-//        response.setData("txtMsg", msg);
-//
-//        if(msg.getToUser() != null){ //私聊:只给私聊的对象返回响应
-//            OnlineClientIOCache io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser().getId());
-//            sendResponse(io, response);
-//        }else{  //群聊:给除了发消息的所有客户端都返回响应
-//            for(Long id : DataBuffer.onlineUserIOCacheMap.keySet()){
-//                if(msg.getFromUser().getId() == id ){	continue; }
-//                sendResponse(DataBuffer.onlineUserIOCacheMap.get(id), response);
-//            }
-//        }
-//    }
-//
+
+    /** 聊天 */
+    public void chatProcess(RequestBody request) throws IOException {
+        Message msg = (Message)request.getAttribute("msg");
+        Response response = new Response();
+        response.setStatus(ResponseStatus.OK);
+        response.setType(ResponseType.CHAT);
+        response.setData("txtMsg", msg);
+
+        if(msg.getToUser() != null){ //私聊:只给私聊的对象返回响应
+            SingleClientIO io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser());
+            sendResponse(io, response);
+        }else{  //群聊:给除了发消息的所有客户端都返回响应
+            for(String user : DataBuffer.onlineUserIOCacheMap.keySet()){
+                if(msg.getFromUser() == user ){	continue; }
+                sendResponse(DataBuffer.onlineUserIOCacheMap.get(user), response);
+            }
+        }
+    }
+
     /*广播*/
     public static void board(String str) throws IOException {
         Message msg = new Message();
@@ -314,14 +277,14 @@ public class RequestProcessor implements Runnable{
             oos.flush();
         }
     }
-//
-//    /** 向指定客户端IO的输出流中输出指定响应 */
-//    private void sendResponse(OnlineClientIOCache onlineUserIO, Response response)throws IOException {
-//        ObjectOutputStream oos = onlineUserIO.getOos();
-//        oos.writeObject(response);
-//        oos.flush();
-//    }
-//
+
+    /** 向指定客户端IO的输出流中输出指定响应 */
+    private void sendResponse(SingleClientIO onlineUserIO, Response response)throws IOException {
+        ObjectOutputStream oos = onlineUserIO.getOos();
+        oos.writeObject(response);
+        oos.flush();
+    }
+
     /** 向指定客户端IO的输出流中输出指定响应 */
     private static void sendResponse_sys(SingleClientIO onlineUserIO, Response response)throws IOException {
         ObjectOutputStream oos = onlineUserIO.getOos();

@@ -1,10 +1,16 @@
 package client;
 
+import common.Message;
+import common.User;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import java.net.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
@@ -23,6 +29,7 @@ public class ClientChatFrame extends JFrame {
 //	public static FileInfo sendFile;
 
 	/** 私聊复选框 */
+	public JButton userListBtn;
 	public JCheckBox rybqBtn;
 
 	public ClientChatFrame(){
@@ -49,8 +56,8 @@ public class ClientChatFrame extends JFrame {
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 				mainPanel, userPanel);
 		splitPane.setDividerLocation(550);
-		splitPane.setDividerSize(10);
-		splitPane.setOneTouchExpandable(true);
+		splitPane.setDividerSize(0);
+		splitPane.getRightComponent().setVisible(false);
 		this.add(splitPane, BorderLayout.CENTER);
 
 		//左上边信息显示面板
@@ -81,28 +88,9 @@ public class ClientChatFrame extends JFrame {
 		tempPanel.setLayout(new BorderLayout());
 		sendPanel.add(tempPanel, BorderLayout.NORTH);
 
-		// 聊天按钮面板
 		JPanel btnPanel = new JPanel();
-		btnPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		tempPanel.add(btnPanel, BorderLayout.CENTER);
-
-		//字体按钮
-		JButton fontBtn = new JButton(new ImageIcon("images/font.png"));
-		fontBtn.setMargin(new Insets(0,0,0,0));
-		fontBtn.setToolTipText("设置字体和格式");
-		btnPanel.add(fontBtn);
-
-		//表情按钮
-		JButton faceBtn = new JButton(new ImageIcon("images/sendFace.png"));
-		faceBtn.setMargin(new Insets(0,0,0,0));
-		faceBtn.setToolTipText("选择表情");
-		btnPanel.add(faceBtn);
-
-		//发送文件按钮
-		JButton shakeBtn = new JButton(new ImageIcon("images/shake.png"));
-		shakeBtn.setMargin(new Insets(0,0,0,0));
-		shakeBtn.setToolTipText("向对方发送窗口振动");
-		btnPanel.add(shakeBtn);
 
 		//发送文件按钮
 		JButton sendFileBtn = new JButton(new ImageIcon("images/sendPic.png"));
@@ -112,7 +100,11 @@ public class ClientChatFrame extends JFrame {
 
 		//私聊按钮
 		rybqBtn = new JCheckBox("私聊");
-		tempPanel.add(rybqBtn, BorderLayout.EAST);
+		btnPanel.add(rybqBtn);
+
+		//用户列表
+		userListBtn = new JButton("用户列表");
+		tempPanel.add(userListBtn, BorderLayout.EAST);
 
 		//要发送的信息的区域
 		sendArea = new JTextArea();
@@ -124,7 +116,6 @@ public class ClientChatFrame extends JFrame {
 		// 聊天按钮面板
 		JPanel btn2Panel = new JPanel();
 		btn2Panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		this.add(btn2Panel, BorderLayout.SOUTH);
 		JButton closeBtn = new JButton("关闭");
 		closeBtn.setToolTipText("退出整个程序");
 		btn2Panel.add(closeBtn);
@@ -151,16 +142,16 @@ public class ClientChatFrame extends JFrame {
 		splitPane3.setDividerSize(1);
 		userPanel.add(splitPane3, BorderLayout.CENTER);
 
-//		//获取在线用户并缓存
-//		ConManager.onlineUserListModel = new OnlineUserListModel(ConManager.onlineUsers);
-//		//在线用户列表
-//		onlineList = new JList(ConManager.onlineUserListModel);
-//		onlineList.setCellRenderer(new MyCellRenderer());
-//		//设置为单选模式
-//		onlineList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//		onlineListPane.add(new JScrollPane(onlineList,
-//				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-//				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+		//获取在线用户并缓存
+		ConManager.onlineUserListModel = new OnlineUserListModel(ConManager.onlineUsers);
+		//在线用户列表
+		onlineList = new JList(ConManager.onlineUserListModel);
+		onlineList.setCellRenderer(new MyCellRenderer());
+		//设置为单选模式
+		onlineList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		onlineListPane.add(new JScrollPane(onlineList,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 
 		//当前用户信息Label
 		currentUserLbl = new JLabel();
@@ -177,24 +168,38 @@ public class ClientChatFrame extends JFrame {
 		//关闭按钮的事件
 		closeBtn.addActionListener(event -> logout());
 
-//		//选择某个用户私聊
-//		rybqBtn.addActionListener(new ActionListener(){
-//			public void actionPerformed(ActionEvent e) {
-//				if(rybqBtn.isSelected()){
-//					User selectedUser = (User)onlineList.getSelectedValue();
-//					if(null == selectedUser){
-//						otherInfoLbl.setText("当前状态：私聊(选中在线用户列表中某个用户进行私聊)...");
-//					}else if(ConManager.currentUser.getId() == selectedUser.getId()){
-//						otherInfoLbl.setText("当前状态：想自言自语?...系统不允许");
-//					}else{
-//						otherInfoLbl.setText("当前状态：与 "+ selectedUser.getNickname()
-//								+"(" + selectedUser.getId() + ") 私聊中...");
-//					}
-//				}else{
-//					otherInfoLbl.setText("当前状态：群聊...");
-//				}
-//			}
-//		});
+		userListBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(splitPane.getRightComponent().isVisible()){
+					splitPane.setDividerSize(0);
+					splitPane.setDividerLocation(550);
+					splitPane.getRightComponent().setVisible(false);
+				}else{
+					splitPane.getRightComponent().setVisible(true);
+					splitPane.setDividerLocation(400);
+					splitPane.setDividerSize(10);
+				}
+			}
+		});
+
+		//选择某个用户私聊
+		rybqBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				if(rybqBtn.isSelected()){
+					String selectedUser = (String)onlineList.getSelectedValue();
+					if(null == selectedUser){
+						otherInfoLbl.setText("当前状态：私聊(选中在线用户列表中某个用户进行私聊)...");
+					}else if(ConManager.currentUser.equals(selectedUser)){
+						otherInfoLbl.setText("当前状态：想自言自语?...系统不允许");
+					}else{
+						otherInfoLbl.setText("当前状态：与 "+ selectedUser +" 私聊中...");
+					}
+				}else{
+					otherInfoLbl.setText("当前状态：群聊...");
+				}
+			}
+		});
 
 //		//选择某个用户Jlist
 //		onlineList.addMouseListener(new MouseAdapter() {
@@ -211,27 +216,20 @@ public class ClientChatFrame extends JFrame {
 //			}
 //		});
 
-//		//发送文本消息
-//		sendArea.addKeyListener(new KeyAdapter(){
-//			public void keyPressed(KeyEvent e){
-//				if(e.getKeyCode() == Event.ENTER){
-//					sendTxtMsg();
-//				}
-//			}
-//		});
-//		submitBtn.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent event) {
-//				sendTxtMsg();
-//			}
-//		});
-//
-//		//发送振动
-//		shakeBtn.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent event) {
-//				sendShakeMsg();
-//			}
-//		});
-//
+		//发送文本消息
+		sendArea.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e){
+				if(e.getKeyCode() == Event.ENTER){
+					sendTxtMsg();
+				}
+			}
+		});
+		submitBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				sendTxtMsg();
+			}
+		});
+
 //		//发送文件
 //		sendFileBtn.addActionListener(new ActionListener() {
 //			public void actionPerformed(ActionEvent event) {
@@ -239,141 +237,95 @@ public class ClientChatFrame extends JFrame {
 //			}
 //		});
 //
-//		this.loadData();  //加载初始数据
+		this.loadData();  //加载初始数据
 	}
 
-//	/**  加载数据 */
-//	public void loadData(){
-//		//加载当前用户数据
-//		if(null != ConManager.currentUser){
-//			currentUserLbl.setIcon(
-//					new ImageIcon("images/" + ConManager.currentUser.getHead() + ".png"));
-//			currentUserLbl.setText(ConManager.currentUser.getNickname()
-//					+ "(" + ConManager.currentUser.getId() + ")");
-//		}
-//		//设置在线用户列表
-//		onlineCountLbl.setText("在线用户列表("+ ConManager.onlineUserListModel.getSize() +")");
-//		//启动监听服务器消息的线程
-//		new ClientThread(this).start();
-//	}
-//
-//	/** 发送振动 */
-//	public void sendShakeMsg(){
-//		User selectedUser = (User)onlineList.getSelectedValue();
-//		if(null != selectedUser){
-//			if(ConManager.currentUser.getId() == selectedUser.getId()){
-//				JOptionPane.showMessageDialog(ChatFrame.this, "不能给自己发送振动!",
-//						"不能发送", JOptionPane.ERROR_MESSAGE);
-//			}else{
-//				Message msg = new Message();
-//				msg.setFromUser(ConManager.currentUser);
-//				msg.setToUser(selectedUser);
-//				msg.setSendTime(new Date());
-//
-//				DateFormat df = new SimpleDateFormat("HH:mm:ss");
-//				StringBuffer sb = new StringBuffer();
-//				sb.append(" ").append(msg.getFromUser().getNickname())
-//						.append("(").append(msg.getFromUser().getId()).append(") ")
-//						.append(df.format(msg.getSendTime()))
-//						.append("\n  给").append(msg.getToUser().getNickname())
-//						.append("(").append(msg.getToUser().getId()).append(") ")
-//						.append("发送了一个窗口抖动\n");
-//				msg.setMessage(sb.toString());
-//
-//				Request request = new Request();
-//				request.setAction("shake");
-//				request.setAttribute("msg", msg);
-//				try {
-//					ClientUtil.sendTextRequest2(request);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//				ClientUtil.appendTxt2MsgListArea(msg.getMessage());
-//				new JFrameShaker(ChatFrame.this).startShake();
-//			}
-//		}else{
-//			JOptionPane.showMessageDialog(ChatFrame.this, "不能群发送振动!",
-//					"不能发送", JOptionPane.ERROR_MESSAGE);
-//		}
-//	}
-//
-//	/** 发送文本消息 */
-//	public void sendTxtMsg(){
-//		String content = sendArea.getText();
-//		if ("".equals(content)) { //无内容
-//			JOptionPane.showMessageDialog(ChatFrame.this, "不能发送空消息!",
-//					"不能发送", JOptionPane.ERROR_MESSAGE);
-//		} else { //发送
-//			User selectedUser = (User)onlineList.getSelectedValue();
-////			if(null != selectedUser &&
-////					ConManager.currentUser.getId() == selectedUser.getId()){
-////				JOptionPane.showMessageDialog(ChatFrame.this, "不能给自己发送消息!",
-////						"不能发送", JOptionPane.ERROR_MESSAGE);
-////				return;
-////			}
-//
-//			//如果设置了ToUser表示私聊，否则群聊
-//			Message msg = new Message();
-//			if(rybqBtn.isSelected()){  //私聊
-//				if(null == selectedUser){
-//					JOptionPane.showMessageDialog(ChatFrame.this, "没有选择私聊对象!",
-//							"不能发送", JOptionPane.ERROR_MESSAGE);
-//					return;
-//				}else if (ConManager.currentUser.getId() == selectedUser.getId()){
-//					JOptionPane.showMessageDialog(ChatFrame.this, "不能给自己发送消息!",
-//							"不能发送", JOptionPane.ERROR_MESSAGE);
-//					return;
-//				}else{
-//					msg.setToUser(selectedUser);
-//				}
-//			}
-//			msg.setFromUser(ConManager.currentUser);
-//			msg.setSendTime(new Date());
-//
-//			DateFormat df = new SimpleDateFormat("HH:mm:ss");
-//			StringBuffer sb = new StringBuffer();
-//			sb.append(" ").append(df.format(msg.getSendTime())).append(" ")
-//					.append(msg.getFromUser().getNickname())
-//					.append("(").append(msg.getFromUser().getId()).append(") ");
-//			if(!this.rybqBtn.isSelected()){//群聊
-////				if(null == selectedUser){
-////					sb.append("对大家说");
-////				}else{
-////					sb.append("对").append(selectedUser.getNickname())
-////						.append("(").append(selectedUser.getId()).append(")")
-////						.append("说");
-////				}
-//				sb.append("对大家说");
-//			}
-//			sb.append("\n  ").append(content).append("\n");
-//			msg.setMessage(sb.toString());
-//
-//			Request request = new Request();
-//			request.setAction("chat");
-//			request.setAttribute("msg", msg);
-//			try {
-//				ClientUtil.sendTextRequest2(request);
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//
-//			//JTextArea中按“Enter”时，清空内容并回到首行
-//			InputMap inputMap = sendArea.getInputMap();
-//			ActionMap actionMap = sendArea.getActionMap();
-//			Object transferTextActionKey = "TRANSFER_TEXT";
-//			inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0),transferTextActionKey);
-//			actionMap.put(transferTextActionKey,new AbstractAction() {
-//				private static final long serialVersionUID = 7041841945830590229L;
-//				public void actionPerformed(ActionEvent e) {
-//					sendArea.setText("");
-//					sendArea.requestFocus();
-//				}
-//			});
-//			sendArea.setText("");
-//			ClientUtil.appendTxt2MsgListArea(msg.getMessage());
-//		}
-//	}
-//
+	/**  加载数据 */
+	public void loadData(){
+		//加载当前用户数据
+		if(null != ConManager.currentUser){
+			currentUserLbl.setIcon(
+					new ImageIcon("images/head.png"));
+			currentUserLbl.setText(ConManager.currentUser);
+		}
+		//设置在线用户列表
+		onlineCountLbl.setText("在线用户列表("+ ConManager.onlineUserListModel.getSize() +")");
+		//启动监听服务器消息的线程
+		new ClientThread(this).start();
+	}
+
+
+	/** 发送文本消息 */
+	public void sendTxtMsg() {
+		String content = sendArea.getText();
+		if ("".equals(content)) { //无内容
+			JOptionPane.showMessageDialog(ClientChatFrame.this, "不能发送空消息!",
+					"不能发送", JOptionPane.ERROR_MESSAGE);
+		} else { //发送
+			String selectedUser = (String) onlineList.getSelectedValue();
+			if (!"".equals(selectedUser) &&
+					ConManager.currentUser.equals(selectedUser)) {
+				JOptionPane.showMessageDialog(ClientChatFrame.this, "不能给自己发送消息!",
+						"不能发送", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			//如果设置了ToUser表示私聊，否则群聊
+			Message msg = new Message();
+			if (rybqBtn.isSelected()) {  //私聊
+				if (null == selectedUser) {
+					JOptionPane.showMessageDialog(ClientChatFrame.this, "没有选择私聊对象!",
+							"不能发送", JOptionPane.ERROR_MESSAGE);
+					return;
+				} else if (ConManager.currentUser.equals(selectedUser)) {
+					JOptionPane.showMessageDialog(ClientChatFrame.this, "不能给自己发送消息!",
+							"不能发送", JOptionPane.ERROR_MESSAGE);
+					return;
+				} else {
+					msg.setToUser(selectedUser);
+				}
+			}
+			msg.setFromUser(ConManager.currentUser);
+			msg.setSendTime(new Date());
+
+			DateFormat df = new SimpleDateFormat("HH:mm:ss");
+			StringBuffer sb = new StringBuffer();
+			sb.append(" ").append(df.format(msg.getSendTime())).append(" ")
+					.append(msg.getFromUser());
+			if (!this.rybqBtn.isSelected()) {//群聊
+				sb.append("对大家说");
+			}
+			sb.append("\n  ").append(content).append("\n");
+			msg.setMessage(sb.toString());
+
+			RequestBody request = new RequestBody();
+			request.setAction("chat");
+			request.setAttribute("msg", msg);
+			try {
+				Requests.sendTextRequestOnly(request);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			//JTextArea中按“Enter”时，清空内容并回到首行
+			InputMap inputMap = sendArea.getInputMap();
+			ActionMap actionMap = sendArea.getActionMap();
+			Object transferTextActionKey = "TRANSFER_TEXT";
+			inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), transferTextActionKey);
+			actionMap.put(transferTextActionKey, new AbstractAction() {
+				private static final long serialVersionUID = 7041841945830590229L;
+
+				public void actionPerformed(ActionEvent e) {
+					sendArea.setText("");
+					sendArea.requestFocus();
+				}
+			});
+			sendArea.setText("");
+			//    /** 把指定文本添加到消息列表文本域中 */
+			Requests.appendTxt2MsgListArea(msg.getMessage());
+		}
+	}
+
 //	/** 发送文件 */
 //	private void sendFile() {
 //		User selectedUser = (User)onlineList.getSelectedValue();
@@ -436,24 +388,6 @@ public class ClientChatFrame extends JFrame {
 			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		}
 	}
-
-//	/*踢除*/
-//	public static void remove() {
-//		int select = JOptionPane.showConfirmDialog(sendArea,
-//				"您已被踢除？\n\n", "系统通知",
-//				JOptionPane.YES_NO_OPTION);
-//
-//		Request req = new Request();
-//		req.setAction("exit");
-//		req.setAttribute("user", ConManager.currentUser);
-//		try {
-//			ClientUtil.sendTextRequest(req);
-//		} catch (IOException ex) {
-//			ex.printStackTrace();
-//		} finally {
-//			System.exit(0);
-//		}
-//
 
 	public static void main(String[] args) {
 		new ClientChatFrame();

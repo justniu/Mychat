@@ -6,6 +6,7 @@ import common.UserStatus;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserServices {
@@ -40,7 +41,6 @@ public class UserServices {
         }finally {
             try {
                 con.commit();
-                con.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -54,7 +54,7 @@ public class UserServices {
         Connection con;
         String sqlStr;
         ResultSet rs;
-        con = DBManager.connection("MyChat", "root", "niuzhuang");
+        con = DataBuffer.con;
         if(con == null) return DBExecuteStatus.CONNECTION_ERROR;
         try {
             con.setAutoCommit(false);
@@ -84,7 +84,6 @@ public class UserServices {
         }finally {
             try {
                 con.commit();
-                con.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -109,7 +108,22 @@ public class UserServices {
     /** 加载所有用户 */
     @SuppressWarnings("unchecked")
     public static List<User> loadAllUser() {
-        List<User> list = null;
+        List<User> list = new ArrayList<User>();
+        Connection con = DataBuffer.con;
+        PreparedStatement preSql;
+        ResultSet rs;
+        String sqlStr = "select name,password from user";
+        try {
+            preSql = con.prepareStatement(sqlStr);
+            rs = preSql.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString(1);
+                String password = rs.getString(2);
+                list.add(new User(name, password));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 //

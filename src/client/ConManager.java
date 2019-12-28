@@ -24,9 +24,9 @@ public class ConManager {
     /** 本客户端的IP地址 */
     public static String ip ;
     /** 用来接收文件的端口 */
-//    public static final int RECEIVE_FILE_PORT = 6667;
+    public static final int RECEIVE_FILE_PORT = 5566;
     /** 在线用户JList的Model */
-//    public static OnlineUserListModel onlineUserListModel;
+    public static OnlineUserListModel onlineUserListModel;
 
 //    static{
 //        screenSize = Toolkit.getDefaultToolkit().getScreenSize();

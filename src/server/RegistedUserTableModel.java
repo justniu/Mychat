@@ -8,7 +8,7 @@ public class RegistedUserTableModel extends AbstractTableModel {
     private static final long serialVersionUID = -6299791067241594227L;
 
     //列名标题
-    private String[] title = {"用户名","密码","昵称"};
+    private String[] title = {"用户名","密码"};
     //数据行
     private List<String[]> rows = new ArrayList<String[]>();
 

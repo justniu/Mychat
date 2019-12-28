@@ -198,8 +198,8 @@ public class ServerInfoFrame extends JFrame{
         List<User> users = new UserServices().loadAllUser();
         for (User user : users) {
             DataBuffer.registedUserTableModel.add(new String[]{
-                    user.getPassword(),
                     user.getUsername(),
+                    user.getPassword(),
             });
         }
     }

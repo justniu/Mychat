@@ -43,6 +43,6 @@ public class ServerMain {
             e.printStackTrace();
         }
         //启动服务器监控窗体
-        new ServerInfoFrame();
+//        new ServerInfoFrame();
     }
 }

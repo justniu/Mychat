@@ -3,6 +3,8 @@ package client;
 import common.Response;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,7 +20,23 @@ public class Requests{
             ConManager.clientSocket = new Socket(ip, 7788);
             ConManager.oos = new ObjectOutputStream(ConManager.clientSocket.getOutputStream());
             ConManager.ois = new ObjectInputStream(ConManager.clientSocket.getInputStream());
-            JOptionPane.showMessageDialog(null, "connected to "+ip, "connected", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane msg = new JOptionPane("connected to "+ip, JOptionPane.INFORMATION_MESSAGE);
+            JDialog dialog = msg.createDialog(null, "连接成功");
+            dialog.setAlwaysOnTop(true);
+            dialog.setModal(true);
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+            // 2秒后自动关闭
+            Timer timer = new Timer(2 * 1000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dialog.dispose();
+                }
+            });
+            timer.setRepeats(false);
+            timer.start();
+
+            dialog.setVisible(true);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(new JFrame(),
                     "连接服务器失败,请检查!","服务器未连上", JOptionPane.ERROR_MESSAGE);//否则连接失败
@@ -51,7 +69,7 @@ public class Requests{
     }
 
     /** 发送请求对象,不主动接收响应 */
-    public static void sendTextRequestBody2(RequestBody RequestBody) throws IOException {
+    public static void sendTextRequestOnly(RequestBody RequestBody) throws IOException {
         try {
             ConManager.oos.writeObject(RequestBody); // 发送请求
             ConManager.oos.flush();
@@ -60,11 +78,11 @@ public class Requests{
             throw e;
         }
     }
+    /** 把指定文本添加到消息列表文本域中 */
+    public static void appendTxt2MsgListArea(String txt) {
+        ClientChatFrame.msgListArea.append(txt);
+        //把光标定位到文本域的最后一行
+        ClientChatFrame.msgListArea.setCaretPosition(ClientChatFrame.msgListArea.getDocument().getLength());
+    }
 
-//    /** 把指定文本添加到消息列表文本域中 */
-//    public static void appendTxt2MsgListArea(String txt) {
-//        ChatFrame.msgListArea.append(txt);
-//        //把光标定位到文本域的最后一行
-//        ChatFrame.msgListArea.setCaretPosition(ChatFrame.msgListArea.getDocument().getLength());
-//    }
 }

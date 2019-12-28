@@ -1,5 +1,6 @@
 package common;
 
+import javax.swing.*;
 import java.io.Serializable;
 
 public class User implements Serializable {
@@ -29,11 +30,11 @@ public class User implements Serializable {
         return this.username;
     }
 
-//
-//    public ImageIcon getHeadIcon(){
-//        ImageIcon image = new ImageIcon("images/"+head+".png");
-//        return image;
-//    }
+
+    public static ImageIcon getHeadIcon(){
+        ImageIcon image = new ImageIcon("images/head.png");
+        return image;
+    }
 
 //    @Override
 //    public int hashCode() {

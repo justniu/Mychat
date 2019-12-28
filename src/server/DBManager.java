@@ -24,6 +24,19 @@ public class DBManager {
         return rs;
     }
 
+    public static void logout(String user){
+        Connection con = DBManager.connection("MyChat", "root", "niuzhuang");
+        PreparedStatement preSql;
+        String sqlStr = "update user set status='OUTLINE' where name=?";
+        try {
+            preSql = con.prepareStatement(sqlStr);
+            preSql.setString(1, user);
+            preSql.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         Connection con = DBManager.connection("MyChat", "root", "niuzhuang");
         try {
