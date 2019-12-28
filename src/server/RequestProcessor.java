@@ -80,30 +80,30 @@ public class RequestProcessor implements Runnable{
 //        this.sendResponse(receiveIO, response2);
 //    }
 //
-//    /** 客户端退出 */
-//    public boolean logout(OnlineClientIOCache oio, Request request) throws IOException{
-//        System.out.println(currentClientSocket.getInetAddress().getHostAddress()
-//                + ":" + currentClientSocket.getPort() + "走了");
-//
-//        User user = (User)request.getAttribute("user");
-//        //把当前上线客户端的IO从Map中删除
-//        DataBuffer.onlineUserIOCacheMap.remove(user.getId());
-//        //从在线用户缓存Map中删除当前用户
-//        DataBuffer.onlineUsersMap.remove(user.getId());
-//
-//        Response response = new Response();  //创建一个响应对象
-//        response.setType(ResponseType.LOGOUT);
-//        response.setData("logoutUser", user);
-//        oio.getOos().writeObject(response);  //把响应对象往客户端写
-//        oio.getOos().flush();
-//        currentClientSocket.close();  //关闭这个客户端Socket
-//
-//        DataBuffer.onlineUserTableModel.remove(user.getId()); //把当前下线用户从在线用户表Model中删除
-//        iteratorResponse(response);//通知所有其它在线客户端
-//
-//        return false;  //断开监听
-//    }
-    /** 注册 */
+    /** 客户端退出 */
+    public boolean logoutProcess(SingleClientIO oio, RequestBody request) throws IOException{
+        System.out.println(currentClientSocket.getInetAddress().getHostAddress()
+                + ":" + currentClientSocket.getPort() + "走了");
+
+        String user = (String)request.getAttribute("user");
+        //把当前上线客户端的IO从Map中删除
+        DataBuffer.onlineUserIOCacheMap.remove(user);
+        //从在线用户缓存Map中删除当前用户
+        DataBuffer.onlineUsersList.remove(user);
+
+        Response response = new Response();  //创建一个响应对象
+        response.setType(ResponseType.LOGOUT);
+        response.setData("logoutUser", user);
+        oio.getOos().writeObject(response);  //把响应对象往客户端写
+        oio.getOos().flush();
+        currentClientSocket.close();  //关闭这个客户端Socket
+
+        DataBuffer.onlineUserTableModel.remove(user); //把当前下线用户从在线用户表Model中删除
+        iteratorResponse(response);//通知所有其它在线客户端
+
+        return false;  //断开监听
+    }
+    /** process registe request*/
     public void registeProcess(SingleClientIO currentClientIO, RequestBody request) throws IOException {
         User user = (User)request.getAttribute("user");
         DBExecuteStatus b = UserServices.addUser(user);
@@ -149,17 +149,18 @@ public class RequestProcessor implements Runnable{
             case HAS_LOGGED_IN_ERROR:
                 response.setStatus(ResponseStatus.OK);
                 response.setData("status", UserStatus.HAS_LOGGED_IN);
-                response.setData("msg", "该 用户已经在别处上线了！");
+                response.setData("msg", "该用户已经在别处上线了！");
                 currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
                 currentClientIO.getOos().flush();
                 break;
 
             case OK:
+                System.out.println(username);
                 DataBuffer.onlineUsersList.add(username); //添加到在线用户
 
                 //设置在线用户
                 response.setData("onlineUsers",
-                        new CopyOnWriteArrayList<String>((String[]) DataBuffer.onlineUsersList.toArray()));
+                        new CopyOnWriteArrayList<String>(DataBuffer.onlineUsersList));
 
                 response.setStatus(ResponseStatus.OK);
                 response.setData("status", UserStatus.LOGIN_SUCCESS);

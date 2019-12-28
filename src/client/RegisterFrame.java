@@ -113,7 +113,7 @@ public class RegisterFrame extends JFrame {
         public void paintComponent(Graphics g){
             super.paintComponent(g);
             //相对路径从src开始
-            Image image = new ImageIcon("src/register.jpg").getImage();
+            Image image = new ImageIcon("images/register.jpg").getImage();
 
             // 跟随窗口调整背景图片大小
             g.drawImage(image,0, 0, this.getWidth(), this.getHeight(),this);

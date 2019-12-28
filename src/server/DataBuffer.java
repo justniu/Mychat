@@ -1,6 +1,7 @@
 package server;
 
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -24,7 +25,7 @@ public class DataBuffer {
     static{
 //        // 初始化
 //        onlineUserIOCacheMap = new ConcurrentSkipListMap<Long,OnlineClientIOCache>();
-//        onlineUsersMap = new ConcurrentSkipListMap<Long, User>();
+        onlineUsersList = new ArrayList<String>();
 //        configProp = new Properties();
 //        registedUserTableModel = new RegistedUserTableModel();
         onlineUserTableModel = new OnlineUserTableModel();
