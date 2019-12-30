@@ -95,7 +95,7 @@ public class ClientChatFrame extends JFrame {
 		//发送文件按钮
 		JButton sendFileBtn = new JButton(new ImageIcon("images/sendPic.png"));
 		sendFileBtn.setMargin(new Insets(0,0,0,0));
-		sendFileBtn.setToolTipText("向对方发送文件");
+		sendFileBtn.setToolTipText("敬请期待");
 		btnPanel.add(sendFileBtn);
 
 		//私聊按钮
@@ -104,6 +104,7 @@ public class ClientChatFrame extends JFrame {
 
 		//用户列表
 		userListBtn = new JButton("用户列表");
+		userListBtn.setToolTipText("展示用户列表");
 		tempPanel.add(userListBtn, BorderLayout.EAST);
 
 		//要发送的信息的区域
@@ -175,10 +176,12 @@ public class ClientChatFrame extends JFrame {
 					splitPane.setDividerSize(0);
 					splitPane.setDividerLocation(550);
 					splitPane.getRightComponent().setVisible(false);
+					userListBtn.setToolTipText("展开用户列表");
 				}else{
 					splitPane.getRightComponent().setVisible(true);
 					splitPane.setDividerLocation(400);
 					splitPane.setDividerSize(10);
+					userListBtn.setToolTipText("关闭用户列表");
 				}
 			}
 		});
@@ -201,20 +204,20 @@ public class ClientChatFrame extends JFrame {
 			}
 		});
 
-//		//选择某个用户Jlist
-//		onlineList.addMouseListener(new MouseAdapter() {
-//			public void mouseClicked(MouseEvent e) {
-//				User selectedUser = (User)onlineList.getSelectedValue();
-//				if(rybqBtn.isSelected()){
-//					if(ConManager.currentUser.getId() == selectedUser.getId()){
-//						otherInfoLbl.setText("当前状态：想自言自语?...系统不允许");
-//					}else{
-//						otherInfoLbl.setText("当前状态：与 "+ selectedUser.getNickname()
-//								+"(" + selectedUser.getId() + ") 私聊中...");
-//					}
-//				}
-//			}
-//		});
+		//选择某个用户Jlist
+		onlineList.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				String selectedUser = (String)onlineList.getSelectedValue();
+				if(rybqBtn.isSelected()){
+					if(ConManager.currentUser.equals(selectedUser)){
+						otherInfoLbl.setText("当前状态：想自言自语?...系统不允许");
+					}else{
+						otherInfoLbl.setText("当前状态：与 "+ selectedUser
+								+ " 私聊中...");
+					}
+				}
+			}
+		});
 
 		//发送文本消息
 		sendArea.addKeyListener(new KeyAdapter(){
@@ -230,13 +233,6 @@ public class ClientChatFrame extends JFrame {
 			}
 		});
 
-//		//发送文件
-//		sendFileBtn.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent event) {
-//				sendFile();
-//			}
-//		});
-//
 		this.loadData();  //加载初始数据
 	}
 
@@ -293,8 +289,10 @@ public class ClientChatFrame extends JFrame {
 			sb.append(" ").append(df.format(msg.getSendTime())).append(" ")
 					.append(msg.getFromUser());
 			if (!this.rybqBtn.isSelected()) {//群聊
-				sb.append("对大家说");
-			}
+				sb.append(" 对大家说：");
+			}else{
+			    sb.append(" 悄悄对 "+msg.getToUser()+" 说：");
+            }
 			sb.append("\n  ").append(content).append("\n");
 			msg.setMessage(sb.toString());
 
@@ -321,52 +319,10 @@ public class ClientChatFrame extends JFrame {
 				}
 			});
 			sendArea.setText("");
-			//    /** 把指定文本添加到消息列表文本域中 */
+			/** 把指定文本添加到消息列表文本域中 */
 			Requests.appendTxt2MsgListArea(msg.getMessage());
 		}
 	}
-
-//	/** 发送文件 */
-//	private void sendFile() {
-//		User selectedUser = (User)onlineList.getSelectedValue();
-//		if(null != selectedUser){
-//			if(ConManager.currentUser.getId() == selectedUser.getId()){
-//				JOptionPane.showMessageDialog(ChatFrame.this, "不能给自己发送文件!",
-//						"不能发送", JOptionPane.ERROR_MESSAGE);
-//			}else{
-//				JFileChooser jfc = new JFileChooser();
-//				if (jfc.showOpenDialog(ChatFrame.this) == JFileChooser.APPROVE_OPTION) {
-//					File file = jfc.getSelectedFile();
-//					sendFile = new FileInfo();
-//					sendFile.setFromUser(ConManager.currentUser);
-//					sendFile.setToUser(selectedUser);
-//					try {
-//						sendFile.setSrcName(file.getCanonicalPath());
-//					} catch (IOException e1) {
-//						e1.printStackTrace();
-//					}
-//					sendFile.setSendTime(new Date());
-//
-//					Request request = new Request();
-//					request.setAction("toSendFile");
-//					request.setAttribute("file", sendFile);
-//					try {
-//						ClientUtil.sendTextRequest2(request);
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
-//
-//					ClientUtil.appendTxt2MsgListArea("【文件消息】向 "
-//							+ selectedUser.getNickname() + "("
-//							+ selectedUser.getId() + ") 发送文件 ["
-//							+ file.getName() + "]，等待对方接收...\n");
-//				}
-//			}
-//		}else{
-//			JOptionPane.showMessageDialog(ChatFrame.this, "不能给所有在线用户发送文件!",
-//					"不能发送", JOptionPane.ERROR_MESSAGE);
-//		}
-//	}
 
 	/** 关闭客户端 */
 	private void logout(){

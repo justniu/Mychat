@@ -42,7 +42,5 @@ public class ServerMain {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //启动服务器监控窗体
-//        new ServerInfoFrame();
     }
 }

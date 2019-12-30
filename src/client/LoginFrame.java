@@ -106,7 +106,7 @@ public class LoginFrame extends JFrame {
         });
 
         signupLb = new JLabel("<html><u>signup</u></html>");
-        signupLb.setBounds(253, 251, 100, 20);
+        signupLb.setBounds(243, 248, 100, 20);
         signupLb.setOpaque(true);
         signupLb.setBorder(new EmptyBorder(0, 0, 0, 0));
         signupLb.setForeground(Color.BLUE);

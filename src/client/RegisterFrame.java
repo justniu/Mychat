@@ -137,7 +137,8 @@ public class RegisterFrame extends JFrame {
                     JOptionPane.showMessageDialog(RegisterFrame.this,
                             "恭喜您，您的账号注册成功,请牢记!!!",
                             "注册成功",JOptionPane.INFORMATION_MESSAGE);
-                    this.setVisible(false);
+                    this.dispose();
+                    new LoginFrame();
                     break;
                 default:
                     JOptionPane.showMessageDialog(RegisterFrame.this,

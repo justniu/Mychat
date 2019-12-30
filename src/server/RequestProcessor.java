@@ -36,10 +36,6 @@ public class RequestProcessor implements Runnable{
                     case "userLogin": loginProcess(currentClientIOCache, request);break;
                     case "exit": flag = logoutProcess(currentClientIOCache, request);break;
                     case "chat": chatProcess(request); break;
-                    case "shake": break;
-                    case "sendFile": break;
-                    case "agreeRecFile": break;
-                    case "refusRecFile": break;
                 }
             }
         }catch(Exception e){
@@ -165,110 +161,13 @@ public class RequestProcessor implements Runnable{
             sendResponse(io, response);
         }else{  //群聊:给除了发消息的所有客户端都返回响应
             for(String user : DataBuffer.onlineUserIOCacheMap.keySet()){
-                if(msg.getFromUser() == user ){	continue; }
+                if(msg.getFromUser().equals(user)  ){	continue; }
                 sendResponse(DataBuffer.onlineUserIOCacheMap.get(user), response);
             }
         }
     }
 
-    /*广播*/
-    public static void board(String str) throws IOException {
-        Message msg = new Message();
-        msg.setFromUser("admin");
-        msg.setSendTime(new Date());
 
-        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-        StringBuffer sb = new StringBuffer();
-        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
-        sb.append("系统通知\n  "+str+"\n");
-        msg.setMessage(sb.toString());
-
-        Response response = new Response();
-        response.setStatus(ResponseStatus.OK);
-        response.setType(ResponseType.BOARD);
-        response.setData("txtMsg", msg);
-
-        for (String name : DataBuffer.onlineUserIOCacheMap.keySet()) {
-            sendResponse_sys(DataBuffer.onlineUserIOCacheMap.get(name), response);
-        }
-    }
-//
-    /*踢除用户*/
-    public static void remove(String user) throws IOException{
-        Message msg = new Message();
-        msg.setFromUser("admin");
-        msg.setSendTime(new Date());
-        msg.setToUser(user);
-
-        StringBuffer sb = new StringBuffer();
-        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
-        sb.append("系统通知您\n  "+"您被强制下线"+"\n");
-        msg.setMessage(sb.toString());
-
-        Response response = new Response();
-        response.setStatus(ResponseStatus.OK);
-        response.setType(ResponseType.REMOVE);
-        response.setData("txtMsg", msg);
-
-        SingleClientIO io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser());
-        sendResponse_sys(io, response);
-    }
-
-    /*私信*/
-    public static void chat_sys(String str,String user_) throws IOException{
-        Message msg = new Message();
-        msg.setFromUser("admin");
-        msg.setSendTime(new Date());
-        msg.setToUser(user_);
-
-        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-        StringBuffer sb = new StringBuffer();
-        sb.append(" ").append(df.format(msg.getSendTime())).append(" ");
-        sb.append("系统通知您\n  "+str+"\n");
-        msg.setMessage(sb.toString());
-
-        Response response = new Response();
-        response.setStatus(ResponseStatus.OK);
-        response.setType(ResponseType.CHAT);
-        response.setData("txtMsg", msg);
-
-        SingleClientIO io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser());
-        sendResponse_sys(io, response);
-    }
-//
-//    /** 发送振动 */
-//    public void shake(Request request)throws IOException {
-//        Message msg = (Message) request.getAttribute("msg");
-//
-//        DateFormat df = new SimpleDateFormat("HH:mm:ss");
-//        StringBuffer sb = new StringBuffer();
-//        sb.append(" ").append(msg.getFromUser().getNickname())
-//                .append("(").append(msg.getFromUser().getId()).append(") ")
-//                .append(df.format(msg.getSendTime())).append("\n  给您发送了一个窗口抖动\n");
-//        msg.setMessage(sb.toString());
-//
-//        Response response = new Response();
-//        response.setStatus(ResponseStatus.OK);
-//        response.setType(ResponseType.SHAKE);
-//        response.setData("ShakeMsg", msg);
-//
-//        OnlineClientIOCache io = DataBuffer.onlineUserIOCacheMap.get(msg.getToUser().getId());
-//        sendResponse(io, response);
-//    }
-//
-//    /** 准备发送文件 */
-//    public void toSendFile(Request request)throws IOException{
-//        Response response = new Response();
-//        response.setStatus(ResponseStatus.OK);
-//        response.setType(ResponseType.TOSENDFILE);
-//        FileInfo sendFile = (FileInfo)request.getAttribute("file");
-//        response.setData("sendFile", sendFile);
-//        //给文件接收方转发文件发送方的请求
-//        OnlineClientIOCache ioCache = DataBuffer.onlineUserIOCacheMap.get(sendFile.getToUser().getId());
-//        sendResponse(ioCache, response);
-//    }
-//
     /** 给所有在线客户都发送响应 */
     private void iteratorResponse(Response response) throws IOException {
         for(SingleClientIO onlineUserIO : DataBuffer.onlineUserIOCacheMap.values()){
@@ -285,10 +184,4 @@ public class RequestProcessor implements Runnable{
         oos.flush();
     }
 
-    /** 向指定客户端IO的输出流中输出指定响应 */
-    private static void sendResponse_sys(SingleClientIO onlineUserIO, Response response)throws IOException {
-        ObjectOutputStream oos = onlineUserIO.getOos();
-        oos.writeObject(response);
-        oos.flush();
-    }
 }
