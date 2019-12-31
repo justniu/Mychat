@@ -63,7 +63,6 @@ public class RequestProcessor implements Runnable{
         oio.getOos().flush();
         currentClientSocket.close();  //关闭这个客户端Socket
 
-        DataBuffer.onlineUserTableModel.remove(user); //把当前下线用户从在线用户表Model中删除
         iteratorResponse(response);//通知所有其它在线客户端
 
         return false;  //断开监听
@@ -80,12 +79,6 @@ public class RequestProcessor implements Runnable{
                 response.setData("status", UserStatus.REGISTE_SUCCESS);
                 currentClientIO.getOos().writeObject(response);  //把响应对象往客户端写
                 currentClientIO.getOos().flush();
-                //把新注册用户添加到RegistedUserTableModel中
-                DataBuffer.registedUserTableModel.add(new String[]{
-                        user.getPassword(),
-                        user.getUsername(),
-                });
-
                 break;
             case EXISTED_ERROR:
                 response.setStatus(ResponseStatus.OK);
@@ -135,8 +128,6 @@ public class RequestProcessor implements Runnable{
                 //把当前上线的用户IO添加到缓存Map中
                 DataBuffer.onlineUserIOCacheMap.put(username, currentClientIO);
 
-                //把当前上线用户添加到OnlineUserTableModel中
-                DataBuffer.onlineUserTableModel.add(username);
                 break;
 
             case NO_EXIST_ERROR:

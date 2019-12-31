@@ -15,10 +15,6 @@ public class DataBuffer {
     public static Map<String, SingleClientIO> onlineUserIOCacheMap;
     //在线用户Map
     public static List<String> onlineUsersList;
-    // 已注册用户表的Model
-    public static RegistedUserTableModel registedUserTableModel;
-    // 当前在线用户表的Model
-    public static OnlineUserTableModel onlineUserTableModel;
     //数据库初始化
     public static Connection con;
 
@@ -26,8 +22,6 @@ public class DataBuffer {
     static{
         onlineUserIOCacheMap = new ConcurrentSkipListMap<String,SingleClientIO>();
         onlineUsersList = new ArrayList<String>();
-        onlineUserTableModel = new OnlineUserTableModel();
-        registedUserTableModel = new RegistedUserTableModel();
         con = DBManager.connection("MyChat", "root", "niuzhuang");
 
     }
