@@ -1,5 +1,7 @@
-package client;
+package client.UI;
 
+import client.Model.RequestBody;
+import client.Tools.Requests;
 import common.Response;
 import common.ResponseStatus;
 import common.User;
@@ -32,7 +34,7 @@ public class RegisterFrame extends JFrame {
 
         contentPanel.setLayout(null);
         contentPanel.setOpaque(true);
-        contentPanel.setFocusable(true);//设置初始光标
+
 
 
         //username label
@@ -139,6 +141,13 @@ public class RegisterFrame extends JFrame {
                             "注册成功",JOptionPane.INFORMATION_MESSAGE);
                     this.dispose();
                     new LoginFrame();
+                    break;
+                case EXIST_ERROR:
+                    JOptionPane.showMessageDialog(RegisterFrame.this, "该用已存在！", "注册失败", JOptionPane.WARNING_MESSAGE);
+                    userTxt.setText("");
+                    passwordTxt.setText("");
+                    confirmTxt.setText("");
+                    userTxt.grabFocus(); // 获得光标
                     break;
                 default:
                     JOptionPane.showMessageDialog(RegisterFrame.this,

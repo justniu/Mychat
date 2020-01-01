@@ -1,18 +1,20 @@
-package client;
+package client.UI;
 
+import client.Model.MyCellRenderer;
+import client.Model.OnlineUserListModel;
+import client.Model.RequestBody;
+import client.Tools.ClientThread;
+import client.Model.ConManager;
+import client.Tools.Requests;
 import common.Message;
-import common.User;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
-import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 public class ClientChatFrame extends JFrame {
 	/** 当前用户信息Lbl */
@@ -179,7 +181,7 @@ public class ClientChatFrame extends JFrame {
 					userListBtn.setToolTipText("展开用户列表");
 				}else{
 					splitPane.getRightComponent().setVisible(true);
-					splitPane.setDividerLocation(400);
+					splitPane.setDividerLocation(430);
 					splitPane.setDividerSize(10);
 					userListBtn.setToolTipText("关闭用户列表");
 				}

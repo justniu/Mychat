@@ -1,12 +1,11 @@
-package client;
+package client.Tools;
 
-import com.mysql.cj.xdevapi.Client;
+import client.Model.ConManager;
+import client.UI.ClientChatFrame;
 import common.*;
 
 import javax.swing.*;
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 public class ClientThread extends Thread{
     private JFrame currentFrame;  //当前窗体

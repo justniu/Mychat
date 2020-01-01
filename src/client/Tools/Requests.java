@@ -1,5 +1,8 @@
-package client;
+package client.Tools;
 
+import client.Model.RequestBody;
+import client.Model.ConManager;
+import client.UI.ClientChatFrame;
 import common.Response;
 
 import javax.swing.*;

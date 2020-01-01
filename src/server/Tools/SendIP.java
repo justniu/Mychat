@@ -1,4 +1,4 @@
-package server;
+package server.Tools;
 
 import java.io.IOException;
 import java.net.*;

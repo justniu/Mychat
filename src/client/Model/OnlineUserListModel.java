@@ -1,4 +1,4 @@
-package client;
+package client.Model;
 
 import javax.swing.*;
 import java.util.List;

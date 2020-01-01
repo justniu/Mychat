@@ -1,5 +1,8 @@
 package client;
 
+import client.Tools.Requests;
+import client.UI.LoginFrame;
+
 import javax.swing.*;
 
 public class ClientMain {

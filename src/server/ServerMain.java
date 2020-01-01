@@ -1,5 +1,9 @@
 package server;
 
+import server.Model.DataBuffer;
+import server.Tools.RequestProcessor;
+import server.Tools.SendIP;
+
 import javax.swing.*;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -33,14 +37,5 @@ public class ServerMain {
                 }
             }
         }).start();
-
-        //设置外观感觉
-        JFrame.setDefaultLookAndFeelDecorated(true);
-        JDialog.setDefaultLookAndFeelDecorated(true);
-        try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

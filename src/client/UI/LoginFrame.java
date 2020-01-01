@@ -1,6 +1,8 @@
-package client;
+package client.UI;
 
-import com.mysql.cj.log.Log;
+import client.Model.ConManager;
+import client.Model.RequestBody;
+import client.Tools.Requests;
 import common.Response;
 import common.ResponseStatus;
 import common.UserStatus;
@@ -19,7 +21,7 @@ public class LoginFrame extends JFrame {
     private JButton loginBtn, cancelBtn;
     private JLabel signupLb;
 
-    LoginFrame() {
+    public LoginFrame() {
         this.setTitle("登陆");
         this.setSize(300, 300);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -77,12 +79,21 @@ public class LoginFrame extends JFrame {
                 }
             }
         });
+        passwordTxt.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                if(e.getKeyCode() == e.VK_ENTER){
+                    login();
+                }
+            }
+        });
         passwordTxt.setBounds(89, 140, 161, 25);
         contentPanel.add(passwordTxt);
 
         //login按钮
         loginBtn = new JButton("登陆");
-        loginBtn.setBounds(95, 210, 80, 23);
+        loginBtn.setBounds(75, 210, 80, 23);
         loginBtn.setBackground(Color.RED);
         loginBtn.addActionListener(new ActionListener() {
             @Override
@@ -94,7 +105,7 @@ public class LoginFrame extends JFrame {
 
         //取消按钮
         cancelBtn = new JButton("重置");
-        cancelBtn.setBounds(210, 210, 80, 23);
+        cancelBtn.setBounds(190, 210, 80, 23);
         cancelBtn.setBackground(Color.GREEN);
         cancelBtn.addActionListener(new ActionListener() {
             @Override

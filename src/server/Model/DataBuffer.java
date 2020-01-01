@@ -1,11 +1,12 @@
-package server;
+package server.Model;
+
+import server.Tools.DBManager;
 
 import java.net.ServerSocket;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class DataBuffer {

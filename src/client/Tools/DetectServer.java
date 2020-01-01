@@ -1,10 +1,10 @@
-package client;
+package client.Tools;
+
+import client.UI.LoginFrame;
 
 import javax.swing.*;
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.*;
-import java.nio.channels.DatagramChannel;
 
 public class DetectServer implements Runnable{
     private static String serverIP;
@@ -49,7 +49,7 @@ public class DetectServer implements Runnable{
                 byte[] buf = new byte[1024];
                 DatagramPacket dp = new DatagramPacket(buf, buf.length);
                 DatagramSocket ds = new DatagramSocket(9999);
-                ds.setSoTimeout(3000);
+                ds.setSoTimeout(3500);
                 ds.receive(dp);
                 serverIP = dp.getAddress().toString().substring(1);
                 flag = true;
